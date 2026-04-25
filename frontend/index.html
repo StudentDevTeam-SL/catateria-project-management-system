@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LuxeCafé — Smart Cafeteria System</title>
+  <meta name="description" content="Modern cafeteria management system with order taking, reservations, and full administration." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    /* ── HOME PAGE ────────────────────────────────── */
+    body {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      background: #0a0a14;
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* ── Animated background ────────────────────── */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      animation: orbFloat 8s ease-in-out infinite;
+    }
+    .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, #ff6b35, #e91e63); top: -150px; left: -100px; animation-delay: 0s; }
+    .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, #7c3aed, #2563eb); bottom: -120px; right: -80px; animation-delay: -3s; }
+    .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, #059669, #0891b2); top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -6s; }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.05); }
+      66% { transform: translate(-20px, 15px) scale(0.95); }
+    }
+
+    /* ── Particle canvas ─────────────────────────── */
+    #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* ── Grid overlay ──────────────────────────── */
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ── Content ─────────────────────────────────── */
+    .hero {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+      animation: fadeDown 0.8s ease both;
+    }
+    .logo-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, #ff6b35, #e91e63);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
+      animation: logoPulse 3s ease-in-out infinite;
+    }
+    @keyframes logoPulse {
+      0%,100% { box-shadow: 0 0 30px rgba(255,107,53,0.5); }
+      50%      { box-shadow: 0 0 60px rgba(255,107,53,0.9); }
+    }
+
+    .brand-name {
+      font-size: 2.8rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffffff, #ff6b35, #e91e63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+
+    .tagline {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.55);
+      font-weight: 400;
+      animation: fadeUp 0.8s 0.2s ease both;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Live clock ──────────────────────────────── */
+    .clock {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+    .clock-time {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .clock-date {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ── Divider ─────────────────────────────────── */
+    .divider {
+      width: 120px; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,107,53,0.7), transparent);
+      animation: fadeUp 0.8s 0.4s ease both;
+    }
+
+    /* ── Main Buttons ────────────────────────────── */
+    .btn-group {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.8s 0.5s ease both;
+    }
+
+    .main-btn {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      border: none;
+      border-radius: 28px;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      text-decoration: none;
+      overflow: hidden;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
+                  box-shadow 0.3s ease;
+      isolation: isolate;
+    }
+
+    /* Ripple */
+    .main-btn::before {
+      content: '';
+      position: absolute;
+      width: 0; height: 0;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
+      opacity: 0;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .main-btn:active::before {
+      width: 400px; height: 400px; opacity: 0;
+    }
+
+    /* Shimmer sweep */
+    .main-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+      transform: translateX(-100%);
+      transition: transform 0.7s ease;
+    }
+    .main-btn:hover::after { transform: translateX(100%); }
+
+    .main-btn:hover {
+      transform: translateY(-10px) scale(1.04);
+    }
+    .main-btn:active {
+      transform: translateY(-4px) scale(1.01);
+    }
+
+    /* Sales button */
+    .btn-sales {
+      background: linear-gradient(145deg, #ff6b35, #e91e63, #c2185b);
+      box-shadow: 0 8px 40px rgba(233,30,99,0.45), 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .btn-sales:hover {
+      box-shadow: 0 20px 60px rgba(233,30,99,0.7), 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    /* Admin button */
+    .btn-admin {
+      background: linear-gradient(145deg, #7c3aed, #4f46e5, #2563eb);
+      box-shadow: 0 8px 40px rgba(99,69,233,0.45), 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .btn-admin:hover {
+      box-shadow: 0 20px 60px rgba(99,69,233,0.7), 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .btn-icon {
+      font-size: 4rem;
+      line-height: 1;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .main-btn:hover .btn-icon { transform: scale(1.2) rotate(-5deg); }
+
+    .btn-label {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .btn-sub {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.7);
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    /* Floating badge */
+    .btn-badge {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(8px);
+      border-radius: 50px;
+      padding: 3px 10px;
+      font-size: 0.68rem;
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    /* ── Footer ──────────────────────────────────── */
+    .footer {
+      position: absolute;
+      bottom: 1.5rem;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.25);
+      z-index: 10;
+      letter-spacing: 0.5px;
+      animation: fadeUp 1s 0.8s ease both;
+    }
+
+    /* ── Animations ──────────────────────────────── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Ripple click effect ──────────────────────── */
+    .ripple-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      width: 10px; height: 10px;
+      animation: rippleAnim 0.7s ease-out forwards;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+    }
+    @keyframes rippleAnim {
+      to { width: 350px; height: 350px; opacity: 0; }
+    }
+
+    /* ── Responsive ──────────────────────────────── */
+    @media (max-width: 600px) {
+      .main-btn { width: 160px; height: 160px; }
+      .btn-icon { font-size: 2.8rem; }
+      .btn-label { font-size: 1.3rem; }
+      .brand-name { font-size: 2rem; }
+      .clock-time { font-size: 2.2rem; }
+      .btn-group { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="grid-overlay"></div>
+  <canvas id="particles"></canvas>
+
+  <!-- Hero -->
+  <main class="hero" role="main">
+    <!-- Logo -->
+    <div class="logo-wrap">
+      <div class="logo-icon" aria-hidden="true">☕</div>
+      <span class="brand-name">LuxeCafé</span>
+    </div>
+
+    <p class="tagline">Smart Cafeteria Management System</p>
+
+    <!-- Live Clock -->
+    <div class="clock" aria-live="polite">
+      <div class="clock-time" id="clockTime">00:00:00</div>
+      <div class="clock-date" id="clockDate">Loading…</div>
+    </div>
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <!-- Main navigation buttons -->
+    <nav class="btn-group" aria-label="Main navigation">
+      <a href="sales.html" id="btnSales" class="main-btn btn-sales" aria-label="Go to Sales — Take orders and process payments">
+        <span class="btn-badge">POS</span>
+        <span class="btn-icon" aria-hidden="true">🛒</span>
+        <span class="btn-label">SALES</span>
+        <span class="btn-sub">Orders & Payments</span>
+      </a>
+
+      <a href="admin.html" id="btnAdmin" class="main-btn btn-admin" aria-label="Go to Admin panel — Manage employees, menu, inventory">
+        <span class="btn-badge">PANEL</span>
+        <span class="btn-icon" aria-hidden="true">⚙️</span>
+        <span class="btn-label">ADMIN</span>
+        <span class="btn-sub">Manage & Reports</span>
+      </a>
+    </nav>
+  </main>
+
+  <footer class="footer">© 2026 LuxeCafé · Cafeteria Management System</footer>
+
+  <script src="db.js"></script>
+  <script>
+    // ── Live Clock ──────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      const timeEl = document.getElementById('clockTime');
+      const dateEl = document.getElementById('clockDate');
+      timeEl.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+      dateEl.textContent = now.toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ── Ripple effect ───────────────────────────────
+    document.querySelectorAll('.main-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple-circle';
+        ripple.style.left = (e.clientX - rect.left) + 'px';
+        ripple.style.top  = (e.clientY - rect.top) + 'px';
+        this.appendChild(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      });
+    });
+
+    // ── Particle system ─────────────────────────────
+    (function() {
+      const canvas = document.getElementById('particles');
+      const ctx = canvas.getContext('2d');
+      let W, H, particles = [];
+
+      function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const COLORS = ['#ff6b35','#e91e63','#7c3aed','#2563eb','#059669','#ffffff'];
+      function mkParticle() {
+        return {
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 2 + 0.5,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+          alpha: Math.random() * 0.6 + 0.2
+        };
+      }
+
+      for (let i = 0; i < 90; i++) particles.push(mkParticle());
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        for (const p of particles) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.alpha;
+          ctx.fill();
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0) p.x = W;
+          if (p.x > W) p.x = 0;
+          if (p.y < 0) p.y = H;
+          if (p.y > H) p.y = 0;
+        }
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    // ── Button magnetic effect ──────────────────────
+    document.querySelectorAll('.main-btn').forEach(btn => {
+      btn.addEventListener('mousemove', function(e) {
+        const rect = this.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top  + rect.height / 2;
+        const dx = (e.clientX - cx) / rect.width  * 14;
+        const dy = (e.clientY - cy) / rect.height * 14;
+        this.style.transform = `translateY(-10px) scale(1.04) perspective(600px) rotateY(${dx}deg) rotateX(${-dy}deg)`;
+      });
+      btn.addEventListener('mouseleave', function() {
+        this.style.transform = '';
+      });
+    });
+  </script>
+</body>
+</html>
